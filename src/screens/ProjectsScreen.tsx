@@ -4,8 +4,10 @@ import { useKeyboardNav } from '../hooks/useKeyboardNav';
 import { CharacterPortrait } from '../components/CharacterPortrait';
 import { DialogBox } from '../components/DialogBox';
 import { DPad } from '../components/DPad';
+import { GitHubPanel } from '../components/GitHubPanel';
 import { CHARACTERS } from '../lib/characters';
 import { PROJECTS } from '../data/projects';
+import { GITHUB_HANDLE } from '../data/contact';
 
 export function ProjectsScreen() {
   const { state, dispatch, settings, play } = useGame();
@@ -120,6 +122,8 @@ export function ProjectsScreen() {
               );
             })}
           </ul>
+
+          <GitHubPanel handle={GITHUB_HANDLE} />
         </div>
 
         <aside className="section__aside">
