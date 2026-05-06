@@ -3,6 +3,7 @@ import { GameContext, type Settings } from './GameContext';
 import { initialState, reducer } from './stateMachine';
 import { Routes } from './routes';
 import { ScanlineOverlay } from '../components/ScanlineOverlay';
+import { Backdrop } from '../components/Backdrop';
 import { useSfx } from '../hooks/useSfx';
 import { usePersistentState } from '../hooks/usePersistentState';
 import { useSystemReducedMotion } from '../hooks/useReducedMotion';
@@ -49,6 +50,7 @@ export function GameShell() {
       <a className="skip-link" href="#screen-content">
         Skip to content
       </a>
+      <Backdrop />
       <div
         className="game-shell"
         data-character={characterTheme}

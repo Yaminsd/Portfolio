@@ -1,0 +1,228 @@
+/* scenes.css — shared keyframes + utilities for the five backdrop scenes.
+ * All animations auto-cancel under [data-reduce-motion='true']
+ * via the global rule in pixel.css.
+ */
+
+.scene-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* clouds drift left → right across the sky */
+@keyframes cloud-drift {
+  0% {
+    transform: translateX(-40px);
+  }
+  100% {
+    transform: translateX(360px);
+  }
+}
+
+/* petals fall + spin */
+@keyframes petal-fall {
+  0% {
+    transform: translate(0, -10px) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.9;
+  }
+  90% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(40px, 200px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* lanterns flicker (gentle) */
+@keyframes lantern-flicker {
+  0%,
+  100% {
+    opacity: 1;
+    filter: brightness(1.05);
+  }
+  20% {
+    opacity: 0.8;
+  }
+  40% {
+    opacity: 1;
+  }
+  55% {
+    opacity: 0.85;
+  }
+  72% {
+    opacity: 1;
+  }
+}
+
+/* stars twinkle */
+@keyframes star-twinkle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* sun rays slowly rotate */
+@keyframes sun-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* fireflies orbit in small loops */
+@keyframes firefly-orbit {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(8px, -6px);
+  }
+  50% {
+    transform: translate(0, -12px);
+  }
+  75% {
+    transform: translate(-8px, -6px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes firefly-glow {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* mist drift (slow, low opacity) */
+@keyframes mist-drift {
+  0% {
+    transform: translateX(-60px);
+  }
+  100% {
+    transform: translateX(60px);
+  }
+}
+
+/* leaves / branches sway */
+@keyframes branch-sway {
+  0%,
+  100% {
+    transform: rotate(-0.5deg);
+  }
+  50% {
+    transform: rotate(0.8deg);
+  }
+}
+
+/* lamppost halo pulse */
+@keyframes lamp-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.08);
+  }
+}
+
+/* bird silhouette dipping across */
+@keyframes bird-cross {
+  0% {
+    transform: translate(-30px, 4px);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(160px, -8px);
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(360px, 4px);
+    opacity: 0;
+  }
+}
+
+/* shared element classes used across multiple scenes */
+.scene-cloud {
+  animation: cloud-drift linear infinite;
+  transform-origin: center;
+}
+.scene-cloud--slow {
+  animation-duration: 80s;
+}
+.scene-cloud--mid {
+  animation-duration: 55s;
+}
+.scene-cloud--fast {
+  animation-duration: 40s;
+}
+
+.scene-petal {
+  animation: petal-fall linear infinite;
+  transform-origin: center;
+}
+
+.scene-firefly {
+  transform-origin: center;
+  animation: firefly-orbit ease-in-out infinite;
+}
+.scene-firefly__glow {
+  animation: firefly-glow ease-in-out infinite;
+}
+
+.scene-lantern {
+  animation: lantern-flicker steps(1, end) 1.6s infinite;
+  transform-origin: center;
+}
+
+.scene-star {
+  animation: star-twinkle ease-in-out infinite;
+}
+
+.scene-sun-rays {
+  animation: sun-rotate linear 90s infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+.scene-mist {
+  animation: mist-drift linear 24s infinite alternate;
+}
+
+.scene-branch {
+  animation: branch-sway ease-in-out 5s infinite;
+  transform-origin: bottom center;
+  transform-box: fill-box;
+}
+
+.scene-lamp-halo {
+  animation: lamp-pulse ease-in-out 3s infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+.scene-bird {
+  animation: bird-cross linear 22s infinite;
+  animation-delay: 8s;
+}
