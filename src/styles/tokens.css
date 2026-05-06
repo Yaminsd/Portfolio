@@ -1,0 +1,85 @@
+/* tokens.css — palette + spacing + per-character theme overrides
+ * Spacing is on a 4px grid; round all paddings/margins/gaps to multiples of --pixel.
+ */
+
+:root {
+  /* pixel grid */
+  --pixel: 4px;
+  --frame-border: 4px;
+  --frame-shadow: 8px 8px 0 0 #000;
+
+  /* base palette */
+  --bg: #0a0a14;
+  --bg-alt: #14141f;
+  --fg: #f5f5f5;
+  --fg-muted: #9aa0b4;
+  --accent: #3a86ff;
+  --accent-2: #ef476f;
+  --accent-3: #ffd166;
+  --danger: #c1121f;
+  --frame: #f5f5f5;
+  --frame-inner: #0a0a14;
+  --shadow: rgba(0, 0, 0, 0.85);
+
+  /* fonts */
+  --font-display: 'Press Start 2P', 'Courier New', monospace;
+  --font-body: 'VT323', 'Courier New', monospace;
+
+  /* character themes */
+  color-scheme: dark;
+}
+
+[data-character='gojo'] {
+  --bg: #060a1a;
+  --bg-alt: #0c1330;
+  --fg: #f5fbff;
+  --fg-muted: #9ec5ff;
+  --accent: #3a86ff;
+  --accent-2: #ff006e;
+  --accent-3: #c4b5fd;
+  --frame: #c4b5fd;
+}
+
+[data-character='sukuna'] {
+  --bg: #150505;
+  --bg-alt: #2a0a0a;
+  --fg: #fdecec;
+  --fg-muted: #c98a8a;
+  --accent: #c1121f;
+  --accent-2: #ffb703;
+  --accent-3: #fb8500;
+  --frame: #ffb703;
+}
+
+[data-character='megumi'] {
+  --bg: #0a0a1f;
+  --bg-alt: #181833;
+  --fg: #eef0ff;
+  --fg-muted: #9092b8;
+  --accent: #3d348b;
+  --accent-2: #7678ed;
+  --accent-3: #c0c0ce;
+  --frame: #c0c0ce;
+}
+
+[data-character='yuji'] {
+  --bg: #1a0a14;
+  --bg-alt: #2a1421;
+  --fg: #fff7ee;
+  --fg-muted: #f0c4a4;
+  --accent: #ef476f;
+  --accent-2: #ffd166;
+  --accent-3: #fff3b0;
+  --frame: #ffd166;
+}
+
+[data-character='system'] {
+  --bg: #0a0a14;
+  --bg-alt: #14141f;
+  --fg: #f5f5f5;
+  --fg-muted: #9aa0b4;
+  --accent: #9aa0b4;
+  --accent-2: #f5f5f5;
+  --accent-3: #6b7280;
+  --frame: #f5f5f5;
+}

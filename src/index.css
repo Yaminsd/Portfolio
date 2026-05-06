@@ -1,0 +1,9 @@
+/* Self-host fonts via Google Fonts CDN for v1.
+ * For full self-hosting (avoid third-party request), drop .ttf into public/fonts/
+ * and replace with @font-face declarations.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+
+@import './styles/tokens.css';
+@import './styles/pixel.css';
+@import './styles/crt.css';

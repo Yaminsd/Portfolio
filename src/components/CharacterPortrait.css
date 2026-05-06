@@ -1,0 +1,68 @@
+.portrait {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg-alt);
+  border: var(--frame-border) solid var(--frame);
+  box-shadow: var(--frame-shadow);
+}
+
+.portrait__sprite {
+  width: 100%;
+  max-width: 192px;
+  aspect-ratio: 32 / 40;
+  background: var(--bg);
+  border: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.portrait__sprite .glyph {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+.portrait__plate {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.portrait__epithet {
+  font-family: var(--font-display);
+  font-size: 10px;
+  color: var(--accent-2);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.portrait__name {
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--fg);
+  letter-spacing: 0.1em;
+}
+
+.portrait__motif {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--fg-muted);
+}
+
+.portrait--sm .portrait__sprite {
+  max-width: 96px;
+}
+.portrait--sm .portrait__name {
+  font-size: 10px;
+}
+.portrait--sm .portrait__epithet {
+  font-size: 8px;
+}
+.portrait--sm .portrait__motif {
+  display: none;
+}

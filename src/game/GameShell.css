@@ -1,0 +1,78 @@
+.game-shell {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  height: 100vh;
+  width: 100vw;
+  background: var(--bg);
+  color: var(--fg);
+  padding: 16px;
+  gap: 12px;
+}
+
+.game-shell__header {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  border-bottom: 2px solid var(--bg-alt);
+  padding-bottom: 8px;
+}
+
+.game-shell__title {
+  color: var(--fg);
+}
+
+.game-shell__separator {
+  color: var(--fg-muted);
+}
+
+.game-shell__chapter {
+  color: var(--accent);
+}
+
+.game-shell__stage {
+  position: relative;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) var(--bg-alt);
+}
+
+.game-shell__stage::-webkit-scrollbar {
+  width: 12px;
+}
+.game-shell__stage::-webkit-scrollbar-track {
+  background: var(--bg-alt);
+}
+.game-shell__stage::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border: 2px solid var(--bg-alt);
+}
+
+.game-shell__hints {
+  display: flex;
+  gap: 24px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--fg-muted);
+  border-top: 2px solid var(--bg-alt);
+  padding-top: 8px;
+  text-transform: uppercase;
+}
+
+@media (max-width: 768px) {
+  .game-shell {
+    padding: 8px;
+    padding-bottom: 100px;
+  }
+  .game-shell__header {
+    font-size: 10px;
+  }
+  .game-shell__hints {
+    display: none;
+  }
+}

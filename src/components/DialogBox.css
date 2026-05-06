@@ -1,0 +1,36 @@
+.dialog-box {
+  position: relative;
+  background: var(--bg-alt);
+  border: var(--frame-border) solid var(--frame);
+  box-shadow: var(--frame-shadow);
+  padding: 16px 20px 18px;
+  margin-top: 8px;
+}
+
+.dialog-box__speaker {
+  position: absolute;
+  top: -16px;
+  left: 16px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  background: var(--frame);
+  color: var(--bg);
+  padding: 4px 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.dialog-box__text {
+  font-family: var(--font-body);
+  font-size: 20px;
+  line-height: 1.4;
+  color: var(--fg);
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.typewriter__caret {
+  display: inline-block;
+  margin-left: 2px;
+  animation: blink 0.8s steps(2, end) infinite;
+}
