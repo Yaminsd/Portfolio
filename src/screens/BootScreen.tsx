@@ -23,7 +23,7 @@ export function BootScreen() {
   return (
     <div className="boot-screen">
       <div className="boot-screen__bracket">▌</div>
-      <h1 className="boot-screen__logo">YAZAN.exe</h1>
+      <h1 className="boot-screen__logo">YAMEN.exe</h1>
       <div className="boot-screen__sub">DOMAIN EXPANSION : PORTFOLIO</div>
       <div className="boot-screen__lines">
         <p>&gt; loading cursed energy...</p>

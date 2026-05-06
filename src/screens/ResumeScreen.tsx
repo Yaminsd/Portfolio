@@ -34,9 +34,9 @@ export function ResumeScreen() {
 
           <a
             className="summon-button"
-            href="/docs/Yazan_Resume.pdf"
+            href="/docs/Yamen_Al-Sader_Resume.pdf"
             download
-            aria-label="Download Yazan's resume PDF"
+            aria-label="Download Yamen Al-Sader's resume PDF"
           >
             <span aria-hidden="true">▼</span>
             <span>SUMMON · DOWNLOAD CV</span>

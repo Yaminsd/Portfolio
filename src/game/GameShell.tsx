@@ -55,7 +55,7 @@ export function GameShell() {
         data-reduce-motion={reduceMotion ? 'true' : 'false'}
       >
         <header className="game-shell__header" aria-hidden="true">
-          <span className="game-shell__title">YAZAN.exe</span>
+          <span className="game-shell__title">YAMEN.exe</span>
           <span className="game-shell__separator">·</span>
           <span className="game-shell__chapter">{characterName}</span>
         </header>

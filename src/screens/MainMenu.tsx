@@ -33,7 +33,7 @@ export function MainMenu() {
   return (
     <div className="main-menu">
       <section className="main-menu__title">
-        <h1 className="main-menu__title-text">YAZAN.exe</h1>
+        <h1 className="main-menu__title-text">YAMEN.exe</h1>
         <p className="main-menu__subtitle">— select a path —</p>
       </section>
 

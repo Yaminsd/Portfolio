@@ -1,3 +1,7 @@
+export const GITHUB_HANDLE = 'Yaminsd';
+export const LINKEDIN_URL =
+  'https://www.linkedin.com/in/yamen-al-sader-2956a225b/';
+
 export type ContactLink = {
   id: string;
   label: string;
@@ -10,29 +14,29 @@ export const CONTACT_LINKS: ContactLink[] = [
   {
     id: 'email',
     label: 'EMAIL',
-    value: 'abdallah.alsous@barqagency.com',
-    href: 'mailto:abdallah.alsous@barqagency.com',
+    value: 'yaminalsadderr@gmail.com',
+    href: 'mailto:yaminalsadderr@gmail.com',
     glyph: '✉',
   },
   {
     id: 'linkedin',
     label: 'LINKEDIN',
-    value: 'linkedin.com/in/yazan',
-    href: 'https://linkedin.com/in/',
+    value: 'yamen-al-sader',
+    href: LINKEDIN_URL,
     glyph: '⌬',
   },
   {
     id: 'github',
     label: 'GITHUB',
-    value: 'github.com/yazan',
-    href: 'https://github.com/',
+    value: `github.com/${GITHUB_HANDLE}`,
+    href: `https://github.com/${GITHUB_HANDLE}`,
     glyph: '◐',
   },
   {
-    id: 'twitter',
-    label: 'X / TWITTER',
-    value: '@yazan',
-    href: 'https://x.com/',
+    id: 'location',
+    label: 'BASE',
+    value: 'Amman, Jordan',
+    href: 'https://www.google.com/maps/place/Amman',
     glyph: '◇',
   },
 ];
