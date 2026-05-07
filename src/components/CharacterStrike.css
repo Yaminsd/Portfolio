@@ -1,0 +1,609 @@
+/* ──────────────────────────────────────────────────────────────────
+ * Character-strike choreography
+ *
+ * Total runtime: 1200ms. Phases:
+ *   0–15%   materialize (sprite fades in at staging position)
+ *  15–50%   wind-up / cast (per-character limb motion + technique build-up)
+ *  50–65%   impact frame (shockwave / lines / flash / button recoil / shake)
+ *  65–100%  recovery + dissipate
+ *
+ * GameShell.tsx fires the screen-change `onImpact` callback at ~720ms
+ * (60% in) and clears the request at ~1280ms.
+ * ────────────────────────────────────────────────────────────────── */
+
+.strike {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* ─── Sprite container — materializes in place; per-part animation lives below. */
+.strike__sprite {
+  position: absolute;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 14px var(--accent));
+  animation: striker-materialize 1200ms ease-out 1 forwards;
+}
+.strike__sprite > svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+@keyframes striker-materialize {
+  0% { opacity: 0; transform: scale(0.7) translateY(8px); filter: drop-shadow(0 0 0 transparent); }
+  10% { opacity: 1; transform: scale(1) translateY(0); filter: drop-shadow(0 0 14px var(--accent)); }
+  78% { opacity: 1; transform: scale(1) translateY(0); }
+  100% { opacity: 0; transform: scale(1.1) translateY(-6px); }
+}
+
+/* When the rect is flipped (right-edge staging), don't undo the scale via materialize */
+.strike__sprite[style*='scaleX(-1)'] { animation-name: striker-materialize-flipped; }
+@keyframes striker-materialize-flipped {
+  0% { opacity: 0; transform: scaleX(-1) scale(0.7) translateY(8px); }
+  10% { opacity: 1; transform: scaleX(-1) scale(1) translateY(0); }
+  78% { opacity: 1; transform: scaleX(-1) scale(1) translateY(0); }
+  100% { opacity: 0; transform: scaleX(-1) scale(1.1) translateY(-6px); }
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Universal impact effects — anchored at --strike-x / --strike-y
+ * Retimed to fire at ~55–62% of the 1200ms total.
+ * ────────────────────────────────────────────────────────────────── */
+
+.strike__impact {
+  position: absolute;
+  top: var(--strike-y, 50%);
+  left: var(--strike-x, 50%);
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  animation: strike-impact 1200ms steps(8, end) 1 forwards;
+}
+
+@keyframes strike-impact {
+  0%, 55% { transform: scale(0); opacity: 0; }
+  58% { transform: scale(0.6); opacity: 1; }
+  68% { transform: scale(1.4); opacity: 1; }
+  80%, 100% { transform: scale(2); opacity: 0; }
+}
+
+.strike__line {
+  position: absolute;
+  top: -3px;
+  left: 0;
+  width: 220px;
+  height: 6px;
+  background: var(--accent-3);
+  box-shadow: 0 0 10px var(--accent-3);
+  transform-origin: 0 50%;
+  transform: rotate(var(--angle, 0deg));
+}
+.strike__line:nth-child(odd) {
+  background: var(--accent-2);
+  box-shadow: 0 0 10px var(--accent-2);
+  width: 180px;
+  height: 4px;
+}
+
+.strike__shockwave {
+  position: absolute;
+  top: var(--strike-y, 50%);
+  left: var(--strike-x, 50%);
+  width: 60px;
+  height: 60px;
+  margin: -30px 0 0 -30px;
+  border: 6px solid var(--accent-3);
+  border-radius: 50% !important;
+  box-shadow: 0 0 28px var(--accent-3);
+  opacity: 0;
+  animation: strike-shockwave 1200ms cubic-bezier(0.2, 0.8, 0.4, 1) 1 forwards;
+}
+
+@keyframes strike-shockwave {
+  0%, 55% { transform: scale(0.2); opacity: 0; }
+  58% { transform: scale(0.6); opacity: 0.95; }
+  82% { transform: scale(4); opacity: 0; }
+  100% { transform: scale(5); opacity: 0; }
+}
+
+.strike__flash {
+  position: absolute;
+  top: var(--strike-y, 50%);
+  left: var(--strike-x, 50%);
+  width: 50vmin;
+  height: 50vmin;
+  margin: -25vmin 0 0 -25vmin;
+  border-radius: 50% !important;
+  background: radial-gradient(circle, var(--accent-3) 0%, var(--accent) 35%, transparent 75%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: strike-flash 1200ms steps(10, end) 1 forwards;
+}
+
+@keyframes strike-flash {
+  0%, 55% { opacity: 0; transform: scale(0.4); }
+  60% { opacity: 0.5; transform: scale(1); }
+  72% { opacity: 0.2; transform: scale(1.2); }
+  82%, 100% { opacity: 0; transform: scale(1.4); }
+}
+
+[data-strike-target='true'] {
+  animation: strike-target-recoil 1200ms cubic-bezier(0.36, 0.07, 0.19, 0.97) 1 forwards !important;
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes strike-target-recoil {
+  0%, 55% { transform: translate(0, 0) scale(1); filter: brightness(1); }
+  60% { transform: translate(-12px, 4px) scale(0.95); filter: brightness(2.2) saturate(1.6); }
+  68% { transform: translate(-6px, 2px) scale(1.02); filter: brightness(1.6); }
+  80% { transform: translate(-2px, 0) scale(1); filter: brightness(1.2); }
+  100% { transform: translate(0, 0) scale(1); filter: brightness(1); }
+}
+
+body.is-striking .game-shell {
+  animation: strike-shake 360ms cubic-bezier(0.36, 0.07, 0.19, 0.97) 700ms 1;
+}
+
+@keyframes strike-shake {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-5px, 3px); }
+  20% { transform: translate(6px, -3px); }
+  35% { transform: translate(-4px, -2px); }
+  50% { transform: translate(4px, 2px); }
+  65% { transform: translate(-3px, 3px); }
+  80% { transform: translate(3px, -1px); }
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * GOJO — Hollow Purple
+ * Front arm draws back to chest (orbs spawn) → orbs merge into purple →
+ * arm thrusts forward → beam fires LEFT toward strike point.
+ * ────────────────────────────────────────────────────────────────── */
+
+.strike[data-character='gojo'] .gojo__arm-front {
+  transform-origin: 24px 30px;
+  animation: gojo-arm-front 1200ms cubic-bezier(0.4, 0, 0.2, 1) 1 forwards;
+}
+@keyframes gojo-arm-front {
+  0% { transform: translate(36px, 6px) scale(0.9); }
+  20% { transform: translate(18px, 0) scale(1); }
+  45% { transform: translate(14px, 0) scale(1); }
+  58% { transform: translate(-14px, 0) scale(1.05); }
+  72% { transform: translate(2px, 0) scale(1); }
+  100% { transform: translate(36px, 6px) scale(0.9); }
+}
+
+.strike[data-character='gojo'] .gojo__arm-back {
+  animation: gojo-arm-back 1200ms cubic-bezier(0.4, 0, 0.2, 1) 1 forwards;
+}
+@keyframes gojo-arm-back {
+  0% { transform: translate(0, 4px); }
+  25% { transform: translate(-22px, -2px); }
+  50% { transform: translate(-26px, -2px); }
+  62% { transform: translate(-22px, 0); }
+  100% { transform: translate(0, 4px); }
+}
+
+.strike[data-character='gojo'] .gojo__orb--blue {
+  animation: gojo-orb-blue 1200ms ease-in-out 1 forwards;
+}
+@keyframes gojo-orb-blue {
+  0%, 22% { r: 0; opacity: 0; transform: translate(-6px, -4px); }
+  30% { r: 5; opacity: 1; transform: translate(-6px, -4px); }
+  44% { r: 4; opacity: 0.95; transform: translate(0, 0); }
+  50% { r: 0; opacity: 0; transform: translate(0, 0); }
+  100% { r: 0; opacity: 0; }
+}
+
+.strike[data-character='gojo'] .gojo__orb--red {
+  animation: gojo-orb-red 1200ms ease-in-out 1 forwards;
+}
+@keyframes gojo-orb-red {
+  0%, 22% { r: 0; opacity: 0; transform: translate(6px, 4px); }
+  30% { r: 5; opacity: 1; transform: translate(6px, 4px); }
+  44% { r: 4; opacity: 0.95; transform: translate(0, 0); }
+  50% { r: 0; opacity: 0; transform: translate(0, 0); }
+  100% { r: 0; opacity: 0; }
+}
+
+.strike[data-character='gojo'] .gojo__orb--purple {
+  animation: gojo-orb-purple 1200ms ease-in-out 1 forwards;
+}
+@keyframes gojo-orb-purple {
+  0%, 46% { r: 0; opacity: 0; }
+  50% { r: 7; opacity: 1; }
+  56% { r: 9; opacity: 1; }
+  62% { r: 12; opacity: 0.6; }
+  68%, 100% { r: 0; opacity: 0; }
+}
+
+/* Gojo's beam — projects from sprite hands toward strike point. */
+.strike[data-character='gojo'] .strike__technique--gojo {
+  position: absolute;
+  top: var(--strike-y, 50%);
+  left: var(--strike-x, 50%);
+  width: 0;
+  height: 0;
+}
+.strike[data-character='gojo'] .strike__technique--gojo::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -10px;
+  width: var(--beam-length, 200px);
+  height: 20px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent-3) 8%,
+    #b266ff 20%,
+    #9d4edd 45%,
+    #b266ff 70%,
+    transparent 100%
+  );
+  box-shadow: 0 0 24px #9d4edd, 0 0 48px #9d4edd;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  opacity: 0;
+  animation: gojo-beam 1200ms cubic-bezier(0.2, 0.9, 0.3, 1) 1 forwards;
+}
+@keyframes gojo-beam {
+  0%, 56% { transform: scaleX(0) scaleY(0.2); opacity: 0; }
+  60% { transform: scaleX(1) scaleY(1); opacity: 1; }
+  72% { transform: scaleX(1) scaleY(1.2); opacity: 1; }
+  84% { transform: scaleX(1) scaleY(0.6); opacity: 0.4; }
+  100% { transform: scaleX(1) scaleY(0); opacity: 0; }
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * SUKUNA — 4-arm Dismantle flurry
+ * Each arm pulls back and snaps forward in sequence; slash marks fade in
+ * at the strike point as each arm completes its swing.
+ * ────────────────────────────────────────────────────────────────── */
+
+.strike[data-character='sukuna'] .sukuna__arm-fu {
+  transform-origin: 24px 30px;
+  animation: sukuna-arm-fu 1200ms cubic-bezier(0.7, 0, 0.3, 1) 1 forwards;
+}
+@keyframes sukuna-arm-fu {
+  0% { transform: translate(28px, 0) rotate(20deg); }
+  18% { transform: translate(24px, -2px) rotate(15deg); }
+  26% { transform: translate(-10px, 0) rotate(-12deg); }
+  40% { transform: translate(20px, 0) rotate(10deg); }
+  100% { transform: translate(28px, 0) rotate(20deg); }
+}
+
+.strike[data-character='sukuna'] .sukuna__arm-fl {
+  transform-origin: 24px 42px;
+  animation: sukuna-arm-fl 1200ms cubic-bezier(0.7, 0, 0.3, 1) 1 forwards;
+}
+@keyframes sukuna-arm-fl {
+  0% { transform: translate(28px, 0) rotate(-15deg); }
+  28% { transform: translate(24px, 0) rotate(-10deg); }
+  38% { transform: translate(-12px, 0) rotate(8deg); }
+  52% { transform: translate(20px, 0) rotate(-8deg); }
+  100% { transform: translate(28px, 0) rotate(-15deg); }
+}
+
+.strike[data-character='sukuna'] .sukuna__arm-bu {
+  transform-origin: 44px 32px;
+  animation: sukuna-arm-bu 1200ms cubic-bezier(0.7, 0, 0.3, 1) 1 forwards;
+}
+@keyframes sukuna-arm-bu {
+  0% { transform: translate(8px, -4px) rotate(40deg); }
+  44% { transform: translate(8px, -4px) rotate(40deg); }
+  56% { transform: translate(-30px, 0) rotate(-30deg); }
+  72% { transform: translate(8px, -4px) rotate(40deg); }
+  100% { transform: translate(8px, -4px) rotate(40deg); }
+}
+
+.strike[data-character='sukuna'] .sukuna__arm-bl {
+  transform-origin: 44px 46px;
+  animation: sukuna-arm-bl 1200ms cubic-bezier(0.7, 0, 0.3, 1) 1 forwards;
+}
+@keyframes sukuna-arm-bl {
+  0% { transform: translate(8px, 4px) rotate(-40deg); }
+  44% { transform: translate(8px, 4px) rotate(-40deg); }
+  56% { transform: translate(-30px, 0) rotate(30deg); }
+  72% { transform: translate(8px, 4px) rotate(-40deg); }
+  100% { transform: translate(8px, 4px) rotate(-40deg); }
+}
+
+.strike[data-character='sukuna'] .strike__technique--sukuna {
+  position: absolute;
+  top: var(--strike-y, 50%);
+  left: var(--strike-x, 50%);
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.sukuna__slash {
+  position: absolute;
+  width: 180px;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent-3) 20%,
+    #ffffff 50%,
+    var(--accent-2) 80%,
+    transparent 100%
+  );
+  box-shadow: 0 0 10px var(--accent-3), 0 0 20px var(--accent-2);
+  top: -2px;
+  left: -90px;
+  transform-origin: 50% 50%;
+  opacity: 0;
+}
+@keyframes sukuna-slash-1 {
+  0%, 22% { opacity: 0; transform: rotate(35deg) scaleX(0); }
+  26% { opacity: 1; transform: rotate(35deg) scaleX(1.05); }
+  60% { opacity: 0.7; transform: rotate(35deg) scaleX(1); }
+  100% { opacity: 0; transform: rotate(35deg) scaleX(1); }
+}
+@keyframes sukuna-slash-2 {
+  0%, 30% { opacity: 0; transform: rotate(-35deg) scaleX(0); }
+  34% { opacity: 1; transform: rotate(-35deg) scaleX(1.05); }
+  60% { opacity: 0.7; transform: rotate(-35deg) scaleX(1); }
+  100% { opacity: 0; transform: rotate(-35deg) scaleX(1); }
+}
+@keyframes sukuna-slash-3 {
+  0%, 50% { opacity: 0; transform: rotate(70deg) scaleX(0); }
+  56% { opacity: 1; transform: rotate(70deg) scaleX(1.1); }
+  68% { opacity: 0.8; transform: rotate(70deg) scaleX(1); }
+  100% { opacity: 0; transform: rotate(70deg) scaleX(1); }
+}
+@keyframes sukuna-slash-4 {
+  0%, 50% { opacity: 0; transform: rotate(-70deg) scaleX(0); }
+  56% { opacity: 1; transform: rotate(-70deg) scaleX(1.1); }
+  68% { opacity: 0.8; transform: rotate(-70deg) scaleX(1); }
+  100% { opacity: 0; transform: rotate(-70deg) scaleX(1); }
+}
+.sukuna__slash--1 { animation: sukuna-slash-1 1200ms steps(6, end) 1 forwards; }
+.sukuna__slash--2 { animation: sukuna-slash-2 1200ms steps(6, end) 1 forwards; }
+.sukuna__slash--3 { animation: sukuna-slash-3 1200ms steps(6, end) 1 forwards; }
+.sukuna__slash--4 { animation: sukuna-slash-4 1200ms steps(6, end) 1 forwards; }
+
+/* ──────────────────────────────────────────────────────────────────
+ * MEGUMI — Divine Dog (shadow shikigami)
+ * Hand outstretched → shadow pool ripples open under the button →
+ * wolf head rises out and snaps shut → retreats into shadow.
+ * ────────────────────────────────────────────────────────────────── */
+
+.strike[data-character='megumi'] .megumi__hand-summon {
+  transform-origin: 24px 35px;
+  animation: megumi-hand 1200ms cubic-bezier(0.4, 0, 0.2, 1) 1 forwards;
+}
+@keyframes megumi-hand {
+  0% { transform: translate(20px, 4px); }
+  25% { transform: translate(0, 0); }
+  60% { transform: translate(-4px, -2px); }
+  78% { transform: translate(-2px, 0); }
+  100% { transform: translate(20px, 4px); }
+}
+
+.strike[data-character='megumi'] .megumi__palm-glow {
+  animation: megumi-palm-glow 1200ms ease-in-out 1 forwards;
+}
+@keyframes megumi-palm-glow {
+  0%, 18% { opacity: 0; }
+  30% { opacity: 0.9; }
+  60% { opacity: 0.7; }
+  85%, 100% { opacity: 0; }
+}
+
+.strike[data-character='megumi'] .strike__technique--megumi {
+  position: absolute;
+  top: var(--strike-y, 50%);
+  left: var(--strike-x, 50%);
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.megumi__pool {
+  position: absolute;
+  left: -80px;
+  top: 8px;
+  width: 160px;
+  height: 32px;
+  border-radius: 50% !important;
+  background: radial-gradient(ellipse, #1a1a2e 0%, #3d348b 50%, transparent 90%);
+  box-shadow: 0 0 24px #7678ed;
+  opacity: 0;
+  transform: scaleY(0);
+  animation: megumi-pool 1200ms cubic-bezier(0.4, 0, 0.2, 1) 1 forwards;
+}
+@keyframes megumi-pool {
+  0%, 18% { opacity: 0; transform: scaleY(0) scaleX(0.4); }
+  32% { opacity: 0.9; transform: scaleY(1) scaleX(1); }
+  62% { opacity: 0.95; transform: scaleY(1.1) scaleX(1.05); }
+  85% { opacity: 0.6; transform: scaleY(0.8) scaleX(0.9); }
+  100% { opacity: 0; transform: scaleY(0) scaleX(0.4); }
+}
+
+.megumi__wolf {
+  position: absolute;
+  left: -56px;
+  top: -56px;
+  width: 112px;
+  height: 84px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 16px #7678ed);
+  opacity: 0;
+  transform: translateY(56px) scale(0.7);
+  animation: megumi-wolf 1200ms cubic-bezier(0.3, 0, 0.2, 1) 1 forwards;
+}
+@keyframes megumi-wolf {
+  0%, 28% { opacity: 0; transform: translateY(56px) scale(0.5); }
+  42% { opacity: 1; transform: translateY(20px) scale(0.9); }
+  58% { opacity: 1; transform: translateY(-8px) scale(1.15); }
+  64% { opacity: 1; transform: translateY(-4px) scale(1.05); }
+  82% { opacity: 0.8; transform: translateY(20px) scale(0.9); }
+  100% { opacity: 0; transform: translateY(56px) scale(0.6); }
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * YUJI — Black Flash punch
+ * Sparks converge on drawn-back fist → torso rotates → fist thrusts
+ * forward → white-yellow flash burst on contact.
+ * ────────────────────────────────────────────────────────────────── */
+
+.strike[data-character='yuji'] .yuji__torso {
+  transform-origin: 32px 50px;
+  animation: yuji-torso 1200ms cubic-bezier(0.5, 0, 0.2, 1) 1 forwards;
+}
+@keyframes yuji-torso {
+  0% { transform: translate(8px, 0) rotate(8deg); }
+  30% { transform: translate(8px, 0) rotate(8deg); }
+  52% { transform: translate(-2px, -2px) rotate(-4deg); }
+  64% { transform: translate(0, 0) rotate(0deg); }
+  100% { transform: translate(8px, 0) rotate(8deg); }
+}
+
+.strike[data-character='yuji'] .yuji__head {
+  transform-origin: 30px 18px;
+  animation: yuji-head 1200ms cubic-bezier(0.5, 0, 0.2, 1) 1 forwards;
+}
+@keyframes yuji-head {
+  0%, 30% { transform: translate(6px, 0) rotate(6deg); }
+  52% { transform: translate(-2px, -1px) rotate(-3deg); }
+  100% { transform: translate(6px, 0) rotate(6deg); }
+}
+
+.strike[data-character='yuji'] .yuji__arm-front {
+  transform-origin: 24px 32px;
+  animation: yuji-arm-front 1200ms cubic-bezier(0.7, 0, 0.2, 1) 1 forwards;
+}
+@keyframes yuji-arm-front {
+  0% { transform: translate(40px, 4px) scale(0.92); }
+  30% { transform: translate(34px, 4px) scale(0.95); }
+  46% { transform: translate(38px, 0) scale(1.02); }
+  56% { transform: translate(-10px, 0) scale(1.1); }
+  68% { transform: translate(8px, 0) scale(1); }
+  100% { transform: translate(40px, 4px) scale(0.92); }
+}
+
+.strike[data-character='yuji'] .yuji__arm-back {
+  animation: yuji-arm-back 1200ms cubic-bezier(0.5, 0, 0.2, 1) 1 forwards;
+}
+@keyframes yuji-arm-back {
+  0% { transform: translate(0, 0); }
+  30% { transform: translate(4px, 4px); }
+  56% { transform: translate(-12px, 2px); }
+  100% { transform: translate(0, 0); }
+}
+
+.strike[data-character='yuji'] .yuji__sparks .yuji__spark {
+  opacity: 0;
+}
+.strike[data-character='yuji'] .yuji__spark--1 {
+  animation: yuji-spark-1 1200ms ease-in-out 1 forwards;
+}
+.strike[data-character='yuji'] .yuji__spark--2 {
+  animation: yuji-spark-2 1200ms ease-in-out 1 forwards;
+}
+.strike[data-character='yuji'] .yuji__spark--3 {
+  animation: yuji-spark-3 1200ms ease-in-out 1 forwards;
+}
+.strike[data-character='yuji'] .yuji__spark--4 {
+  animation: yuji-spark-4 1200ms ease-in-out 1 forwards;
+}
+@keyframes yuji-spark-1 {
+  0%, 12% { opacity: 0; transform: translate(0, 0); }
+  20% { opacity: 1; transform: translate(0, 0); }
+  48% { opacity: 1; transform: translate(-6px, 8px); }
+  56% { opacity: 0; transform: translate(-10px, 12px); }
+  100% { opacity: 0; }
+}
+@keyframes yuji-spark-2 {
+  0%, 14% { opacity: 0; transform: translate(0, 0); }
+  22% { opacity: 1; transform: translate(0, 0); }
+  48% { opacity: 1; transform: translate(-12px, -2px); }
+  56% { opacity: 0; transform: translate(-16px, -4px); }
+  100% { opacity: 0; }
+}
+@keyframes yuji-spark-3 {
+  0%, 16% { opacity: 0; transform: translate(0, 0); }
+  24% { opacity: 1; transform: translate(0, 0); }
+  48% { opacity: 1; transform: translate(-4px, -4px); }
+  56% { opacity: 0; transform: translate(-8px, -8px); }
+  100% { opacity: 0; }
+}
+@keyframes yuji-spark-4 {
+  0%, 18% { opacity: 0; transform: translate(0, 0); }
+  26% { opacity: 1; transform: translate(0, 0); }
+  48% { opacity: 1; transform: translate(-10px, -8px); }
+  56% { opacity: 0; transform: translate(-14px, -12px); }
+  100% { opacity: 0; }
+}
+
+.strike[data-character='yuji'] .strike__technique--yuji {
+  position: absolute;
+  top: var(--strike-y, 50%);
+  left: var(--strike-x, 50%);
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.yuji__flash-burst {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  margin: -100px 0 0 -100px;
+  border-radius: 50% !important;
+  background: radial-gradient(
+    circle,
+    #ffffff 0%,
+    #fff3b0 25%,
+    #ffd166 45%,
+    #ef476f 70%,
+    transparent 95%
+  );
+  mix-blend-mode: screen;
+  opacity: 0;
+  transform: scale(0);
+  animation: yuji-flash-burst 1200ms cubic-bezier(0.2, 0.8, 0.4, 1) 1 forwards;
+}
+@keyframes yuji-flash-burst {
+  0%, 52% { opacity: 0; transform: scale(0); }
+  56% { opacity: 1; transform: scale(0.4); }
+  62% { opacity: 1; transform: scale(1.4); }
+  72% { opacity: 0.5; transform: scale(2); }
+  82%, 100% { opacity: 0; transform: scale(2.5); }
+}
+
+.yuji__flash-ring {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  margin: -40px 0 0 -40px;
+  border: 4px solid #fff3b0;
+  border-radius: 50% !important;
+  box-shadow: 0 0 20px #ffd166, inset 0 0 12px #ffffff;
+  opacity: 0;
+  transform: scale(0);
+  animation: yuji-flash-ring 1200ms cubic-bezier(0.2, 0.9, 0.4, 1) 1 forwards;
+}
+@keyframes yuji-flash-ring {
+  0%, 54% { opacity: 0; transform: scale(0); }
+  58% { opacity: 1; transform: scale(0.8); }
+  72% { opacity: 0; transform: scale(3.5); }
+  100% { opacity: 0; transform: scale(4); }
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Reduce-motion gate
+ * ────────────────────────────────────────────────────────────────── */
+[data-reduce-motion='true'] .strike,
+[data-reduce-motion='true'] body.is-striking .game-shell {
+  display: none;
+  animation: none !important;
+}

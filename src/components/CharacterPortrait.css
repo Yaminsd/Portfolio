@@ -8,6 +8,15 @@
   border: var(--frame-border) solid var(--frame);
   box-shadow: var(--frame-shadow);
   position: relative;
+  max-width: 100%;
+}
+
+@media (max-width: 480px) {
+  .portrait {
+    padding: 8px;
+    gap: 8px;
+    box-shadow: 4px 4px 0 0 #000;
+  }
 }
 
 .portrait__sprite {

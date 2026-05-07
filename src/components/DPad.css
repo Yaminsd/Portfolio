@@ -1,9 +1,9 @@
 .dpad {
   display: none;
   position: fixed;
-  bottom: 12px;
-  left: 0;
-  right: 0;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  left: env(safe-area-inset-left);
+  right: env(safe-area-inset-right);
   padding: 12px 16px;
   z-index: 100;
   pointer-events: none;
@@ -55,4 +55,37 @@
 .dpad__btn--b {
   background: var(--accent-2);
   color: var(--bg);
+}
+
+@media (max-width: 480px) {
+  .dpad {
+    padding: 8px 10px;
+  }
+  .dpad__btn {
+    width: 48px;
+    height: 48px;
+    font-size: 16px;
+    border-width: 3px;
+  }
+  .dpad__pad,
+  .dpad__actions {
+    gap: 8px;
+  }
+}
+
+@media (max-height: 480px) and (orientation: landscape) {
+  .dpad {
+    padding: 6px 10px;
+    bottom: calc(6px + env(safe-area-inset-bottom));
+  }
+  .dpad__btn {
+    width: 44px;
+    height: 44px;
+    font-size: 14px;
+    border-width: 3px;
+  }
+  .dpad__pad,
+  .dpad__actions {
+    gap: 6px;
+  }
 }

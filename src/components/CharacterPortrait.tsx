@@ -21,7 +21,7 @@ export function CharacterPortrait({ character, size = 'md' }: Props) {
   );
 }
 
-function CharacterGlyph({ id }: { id: CharacterId }) {
+export function CharacterGlyph({ id }: { id: CharacterId }) {
   switch (id) {
     case 'gojo':
       return <GojoGlyph />;

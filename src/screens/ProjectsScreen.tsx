@@ -1,13 +1,14 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type CSSProperties } from 'react';
 import { useGame } from '../game/GameContext';
 import { useKeyboardNav } from '../hooks/useKeyboardNav';
 import { CharacterPortrait } from '../components/CharacterPortrait';
 import { DialogBox } from '../components/DialogBox';
 import { DPad } from '../components/DPad';
 import { GitHubPanel } from '../components/GitHubPanel';
-import { CHARACTERS } from '../lib/characters';
 import { PROJECTS } from '../data/projects';
 import { GITHUB_HANDLE } from '../data/contact';
+
+const stagger = (i: number): CSSProperties => ({ ['--i' as string]: i } as CSSProperties);
 
 export function ProjectsScreen() {
   const { state, dispatch, settings, play } = useGame();
@@ -39,12 +40,11 @@ export function ProjectsScreen() {
     refs.current[cursor]?.focus({ preventScroll: false });
   }, [cursor]);
 
-  const character = CHARACTERS.sukuna;
   const active = PROJECTS[cursor];
 
   return (
     <div className="section section--projects">
-      <header className="section__header">
+      <header className="section__header stagger-in" style={stagger(0)}>
         <h1 className="section__title">PROJECTS · BOSS LIST</h1>
         <button type="button" className="section__back" onClick={back}>
           [ ESC · BACK ]
@@ -53,11 +53,12 @@ export function ProjectsScreen() {
 
       <div className="section__columns">
         <div className="section__main">
-          <DialogBox
-            speaker={character.epithet}
-            text={`"${character.greeting}"\n\nNow — challenge a boss to learn more.`}
-            reduceMotion={reduceMotion}
-          />
+          <div className="stagger-in" style={stagger(1)}>
+            <DialogBox
+              text={'Now — challenge a boss to learn more.'}
+              reduceMotion={reduceMotion}
+            />
+          </div>
 
           <ul className="projects-list" role="menu">
             {PROJECTS.map((p, i) => {
@@ -74,7 +75,8 @@ export function ProjectsScreen() {
                     href={p.url}
                     target={p.url ? '_blank' : undefined}
                     rel={p.url ? 'noopener noreferrer' : undefined}
-                    className={`boss-card ${isActive ? 'is-active' : ''}`}
+                    className={`boss-card stagger-in ${isActive ? 'is-active' : ''}`}
+                    style={stagger(2 + i)}
                     aria-current={isActive ? 'true' : undefined}
                     onMouseEnter={() => {
                       if (!isActive) {
@@ -123,10 +125,12 @@ export function ProjectsScreen() {
             })}
           </ul>
 
-          <GitHubPanel handle={GITHUB_HANDLE} />
+          <div className="stagger-in" style={stagger(2 + PROJECTS.length)}>
+            <GitHubPanel handle={GITHUB_HANDLE} />
+          </div>
         </div>
 
-        <aside className="section__aside">
+        <aside className="section__aside stagger-in" style={stagger(1)}>
           <CharacterPortrait character="sukuna" />
           {active ? (
             <p

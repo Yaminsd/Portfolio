@@ -1,0 +1,37 @@
+.energy-particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.energy-particle {
+  position: absolute;
+  bottom: -40px;
+  color: var(--accent);
+  font-family: var(--font-display);
+  text-shadow: 0 0 8px currentColor;
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: energy-drift var(--dur, 18s) linear var(--delay, 0s) infinite;
+}
+
+.energy-particle:nth-child(odd) {
+  color: var(--accent-3);
+}
+
+.energy-particle:nth-child(3n) {
+  color: var(--accent-2);
+}
+
+[data-reduce-motion='true'] .energy-particles,
+[data-screen='boot'] .energy-particles {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .energy-particle:nth-child(n + 5) {
+    display: none;
+  }
+}

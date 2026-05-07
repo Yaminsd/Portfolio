@@ -1,13 +1,15 @@
-import { useMemo, useReducer } from 'react';
-import { GameContext, type Settings } from './GameContext';
+import { useCallback, useMemo, useReducer, useRef, useState } from 'react';
+import { GameContext, type Settings, type StrikeRect } from './GameContext';
 import { initialState, reducer } from './stateMachine';
 import { Routes } from './routes';
 import { ScanlineOverlay } from '../components/ScanlineOverlay';
 import { Backdrop } from '../components/Backdrop';
+import { EnergyParticles } from '../components/EnergyParticles';
+import { CharacterStrike, type StrikeRequest } from '../components/CharacterStrike';
 import { useSfx } from '../hooks/useSfx';
 import { usePersistentState } from '../hooks/usePersistentState';
 import { useSystemReducedMotion } from '../hooks/useReducedMotion';
-import { CHARACTERS } from '../lib/characters';
+import { CHARACTERS, type CharacterId } from '../lib/characters';
 
 const DEFAULT_SETTINGS: Settings = {
   sfxVolume: 0.6,
@@ -37,9 +39,41 @@ export function GameShell() {
 
   const play = useSfx(settings.sfxVolume);
 
+  const [strikeRequest, setStrikeRequest] = useState<StrikeRequest | null>(null);
+  const strikeTargetRef = useRef<HTMLElement | null>(null);
+
+  const requestStrike = useCallback(
+    (
+      rect: StrikeRect,
+      character: CharacterId,
+      onImpact: () => void,
+      targetEl?: HTMLElement | null,
+    ) => {
+      if (reduceMotion) {
+        onImpact();
+        return;
+      }
+      const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      if (targetEl) {
+        targetEl.setAttribute('data-strike-target', 'true');
+        strikeTargetRef.current = targetEl;
+      }
+      setStrikeRequest({ id, rect, character });
+      window.setTimeout(() => onImpact(), 720);
+      window.setTimeout(() => {
+        setStrikeRequest((curr) => (curr?.id === id ? null : curr));
+        if (strikeTargetRef.current) {
+          strikeTargetRef.current.removeAttribute('data-strike-target');
+          strikeTargetRef.current = null;
+        }
+      }, 1280);
+    },
+    [reduceMotion],
+  );
+
   const value = useMemo(
-    () => ({ state, dispatch, play, settings, setSettings }),
-    [state, play, settings, setSettings],
+    () => ({ state, dispatch, play, settings, setSettings, requestStrike }),
+    [state, play, settings, setSettings, requestStrike],
   );
 
   const characterTheme = SCREEN_TO_CHARACTER[state.screen];
@@ -51,9 +85,13 @@ export function GameShell() {
         Skip to content
       </a>
       <Backdrop />
+      {!reduceMotion && state.screen !== 'BOOT' ? (
+        <EnergyParticles themeKey={characterTheme} />
+      ) : null}
       <div
         className="game-shell"
         data-character={characterTheme}
+        data-screen={state.screen.toLowerCase()}
         data-reduce-motion={reduceMotion ? 'true' : 'false'}
       >
         <header className="game-shell__header" aria-hidden="true">
@@ -70,6 +108,7 @@ export function GameShell() {
           <span>ESC BACK</span>
         </footer>
       </div>
+      <CharacterStrike request={strikeRequest} />
       <ScanlineOverlay enabled={settings.crtEffects && !reduceMotion} />
     </GameContext.Provider>
   );

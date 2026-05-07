@@ -7,6 +7,22 @@
   margin-top: 8px;
 }
 
+@media (max-width: 480px) {
+  .dialog-box {
+    padding: 12px 14px 14px;
+    box-shadow: 4px 4px 0 0 #000;
+  }
+}
+
+.dialog-box--plain {
+  margin-top: 0;
+  border-color: var(--accent);
+  border-style: dashed;
+  border-width: 2px;
+  box-shadow: none;
+  padding: 12px 16px;
+}
+
 .dialog-box__speaker {
   position: absolute;
   top: -16px;
@@ -22,11 +38,12 @@
 
 .dialog-box__text {
   font-family: var(--font-body);
-  font-size: 20px;
+  font-size: clamp(15px, 1.4vw + 9px, 20px);
   line-height: 1.4;
   color: var(--fg);
   margin: 0;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .typewriter__caret {

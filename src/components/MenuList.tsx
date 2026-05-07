@@ -5,7 +5,7 @@ import { useKeyboardNav } from '../hooks/useKeyboardNav';
 export type MenuItem = {
   label: string;
   hint?: string;
-  onSelect: () => void;
+  onSelect: (el: HTMLElement) => void;
   disabled?: boolean;
 };
 
@@ -35,9 +35,10 @@ export function MenuList({ items, cursor, onCursor, enabled = true }: Props) {
 
   const confirm = () => {
     const item = items[cursor];
-    if (!item || item.disabled) return;
+    const el = itemRefs.current[cursor];
+    if (!item || item.disabled || !el) return;
     play('confirm');
-    item.onSelect();
+    item.onSelect(el);
   };
 
   useKeyboardNav(
@@ -70,11 +71,11 @@ export function MenuList({ items, cursor, onCursor, enabled = true }: Props) {
                   play('move');
                 }
               }}
-              onClick={() => {
+              onClick={(e) => {
                 onCursor(i);
                 if (!item.disabled) {
                   play('confirm');
-                  item.onSelect();
+                  item.onSelect(e.currentTarget);
                 }
               }}
             >

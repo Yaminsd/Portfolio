@@ -8,6 +8,8 @@ import './components/DialogBox.css';
 import './components/DPad.css';
 import './components/GitHubPanel.css';
 import './components/Backdrop.css';
+import './components/EnergyParticles.css';
+import './components/CharacterStrike.css';
 import './scenes/scenes.css';
 import './screens/BootScreen.css';
 import './screens/MainMenu.css';

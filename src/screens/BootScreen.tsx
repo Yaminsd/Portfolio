@@ -26,8 +26,14 @@ export function BootScreen() {
       <h1 className="boot-screen__logo">YAMEN.exe</h1>
       <div className="boot-screen__sub">DOMAIN EXPANSION : PORTFOLIO</div>
       <div className="boot-screen__lines">
-        <p>&gt; loading cursed energy...</p>
-        <p>&gt; verifying six eyes integrity...</p>
+        <p>
+          <span className="boot-screen__rune" aria-hidden="true">◐</span>{' '}
+          loading cursed energy...
+        </p>
+        <p>
+          <span className="boot-screen__rune" aria-hidden="true">◓</span>{' '}
+          verifying six eyes integrity...
+        </p>
         <p>&gt; press [ENTER] to continue</p>
       </div>
     </div>

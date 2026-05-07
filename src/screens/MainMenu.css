@@ -16,15 +16,30 @@
 
 .main-menu__title-text {
   font-family: var(--font-display);
-  font-size: clamp(24px, 5vw, 44px);
+  font-size: clamp(22px, 6vw, 44px);
   letter-spacing: 0.1em;
   color: var(--fg);
   text-shadow: 4px 4px 0 var(--accent), 8px 8px 0 var(--accent-2);
+  animation: glitch-in 900ms steps(20, end) 1 backwards,
+    title-float 5s ease-in-out 900ms infinite;
+  word-break: break-word;
+}
+
+@keyframes title-float {
+  0%,
+  100% {
+    transform: translateY(0);
+    text-shadow: 4px 4px 0 var(--accent), 8px 8px 0 var(--accent-2);
+  }
+  50% {
+    transform: translateY(-3px);
+    text-shadow: 4px 6px 0 var(--accent), 8px 10px 0 var(--accent-2);
+  }
 }
 
 .main-menu__subtitle {
   font-family: var(--font-body);
-  font-size: 18px;
+  font-size: clamp(14px, 1.6vw + 8px, 18px);
   color: var(--fg-muted);
   margin: 0;
   letter-spacing: 0.1em;
@@ -33,7 +48,7 @@
 
 .main-menu__center {
   display: grid;
-  grid-template-columns: minmax(300px, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 32px;
   align-items: center;
   justify-content: center;
@@ -56,11 +71,33 @@
   opacity: 0.85;
 }
 
+@media (max-width: 1024px) {
+  .main-menu__roster {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
+  .main-menu {
+    padding: 8px;
+    gap: 12px;
+  }
   .main-menu__center {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
   .main-menu__roster {
     display: none;
+  }
+  .main-menu__menu-frame {
+    max-width: 100%;
+    padding: 12px 6px;
+    box-shadow: 4px 4px 0 0 #000;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-menu__title-text {
+    text-shadow: 3px 3px 0 var(--accent), 6px 6px 0 var(--accent-2);
   }
 }

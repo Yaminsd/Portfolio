@@ -1,11 +1,12 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type CSSProperties } from 'react';
 import { useGame } from '../game/GameContext';
 import { useKeyboardNav } from '../hooks/useKeyboardNav';
 import { CharacterPortrait } from '../components/CharacterPortrait';
 import { DialogBox } from '../components/DialogBox';
 import { DPad } from '../components/DPad';
-import { CHARACTERS } from '../lib/characters';
 import { CONTACT_LINKS } from '../data/contact';
+
+const stagger = (i: number): CSSProperties => ({ ['--i' as string]: i } as CSSProperties);
 
 export function ContactScreen() {
   const { state, dispatch, play, settings } = useGame();
@@ -36,11 +37,9 @@ export function ContactScreen() {
     refs.current[cursor]?.focus({ preventScroll: false });
   }, [cursor]);
 
-  const character = CHARACTERS.yuji;
-
   return (
     <div className="section section--contact">
-      <header className="section__header">
+      <header className="section__header stagger-in" style={stagger(0)}>
         <h1 className="section__title">PARTY · CONTACT</h1>
         <button type="button" className="section__back" onClick={back}>
           [ ESC · BACK ]
@@ -49,11 +48,12 @@ export function ContactScreen() {
 
       <div className="section__columns">
         <div className="section__main">
-          <DialogBox
-            speaker={character.epithet}
-            text={`"${character.greeting}"\n\nPick a channel — let's talk.`}
-            reduceMotion={settings.reduceMotion}
-          />
+          <div className="stagger-in" style={stagger(1)}>
+            <DialogBox
+              text={"Pick a channel — let's talk."}
+              reduceMotion={settings.reduceMotion}
+            />
+          </div>
 
           <ul className="contact-list" role="menu">
             {CONTACT_LINKS.map((c, i) => {
@@ -68,7 +68,8 @@ export function ContactScreen() {
                     href={c.href}
                     target={c.id === 'email' ? '_self' : '_blank'}
                     rel="noopener noreferrer"
-                    className={`contact-card ${isActive ? 'is-active' : ''}`}
+                    className={`contact-card stagger-in ${isActive ? 'is-active' : ''}`}
+                    style={stagger(2 + i)}
                     aria-current={isActive ? 'true' : undefined}
                     onMouseEnter={() => {
                       if (!isActive) {
@@ -95,7 +96,7 @@ export function ContactScreen() {
             })}
           </ul>
         </div>
-        <aside className="section__aside">
+        <aside className="section__aside stagger-in" style={stagger(1)}>
           <CharacterPortrait character="yuji" />
         </aside>
       </div>
